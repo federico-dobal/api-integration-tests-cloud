@@ -1,0 +1,14 @@
+.venv
+**/.venv
+
+**/*.pyc
+
+**docs/nerdearla2023
+
+.terraform**
+terraform.tfstate
+terraform.tfstate**
+
+__pycache__
+**/__pycache__
+**/__pycache__/**
