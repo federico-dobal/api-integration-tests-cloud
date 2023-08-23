@@ -14,7 +14,11 @@ def lambda_handler(event, context):
             return format_return(status_code=400, body={'message': 'ERROR: mandatory data not provided'})
         
         street_name = event.get('id')
-        return API.get_address_with_name(street_name)
+        address_in_db = API.get_address_with_name(street_name)
+        if not address_in_db:
+            return format_return(status_code=404, body={'message': 'ERROR: address not found'})
+        else:
+            return format_return(status_code=200, body=address_in_db)
     except ApiException as e:
         logger.error(f"API Exception: {e.body}")
         return format_return(status_code=e.status_code, body=e.body)

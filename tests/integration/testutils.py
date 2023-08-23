@@ -68,19 +68,3 @@ def bucket_exists(bucket: str):
         return True
     except botocore.exceptions.ClientError as ex:
         return False
-
-def create_object_in_bucket(bucket_name, objec_key):
-    s3_client = get_s3_client()
-
-    # fails if bucket does not exists
-    response = s3_client.head_bucket(
-        Bucket=bucket_name,
-    )
-
-    # If did not fail then a new object is created
-    if response:
-        s3_client.put_object(
-            Body="files/a.png",
-            Bucket=bucket_name,
-            Key=objec_key,
-        )

@@ -26,23 +26,32 @@ class TestLambdaWorkspace(unittest.TestCase):
 
 
     def test_student_workspace_exists(self):
+        # GIVEN an study ID whose workspace exists
         event = {'id': STUDENT_ID}
+        self.assertTrue(testutils.bucket_exists(STUDENT_ID))
 
+        # WHEN the Lambda function is executed
         address = lambda_handler(event=event, context=None)
 
-        assert address.get('statusCode') == 200
-        assert json.loads(address.get('body')).get('message') == 'Workspace created successfully'
-
-        assert testutils.bucket_exists(STUDENT_ID)
-        assert not testutils.bucket_exists(STUDENT_ID + '-1')
+        # THEN it is successfully retrieved
+        self.assertEqual(address.get('statusCode'), 200)
+        self.assertEqual(json.loads(address.get('body')).get('message'), 'Workspace created successfully')
+        
+        # AND the bucket associated with it still exists
+        self.assertTrue(testutils.bucket_exists(STUDENT_ID))
+        self.assertFalse(testutils.bucket_exists(STUDENT_ID + '-1'))
 
     def test_student_workspace_not_exists(self):
+        # GIVEN an study ID whose workspace does NOT exist
         event = {'id': STUDENT_ID + '-1'}
 
+        # WHEN the Lambda function is executed
         address = lambda_handler(event=event, context=None)
 
-        assert address.get('statusCode') == 200
-        assert json.loads(address.get('body')).get('message') == 'Workspace created successfully'        
+        # THEN it is successfully created and retrieved
+        self.assertEqual(address.get('statusCode'), 200)
+        self.assertEqual(json.loads(address.get('body')).get('message'), 'Workspace created successfully')        
         
-        assert testutils.bucket_exists(STUDENT_ID)
-        assert testutils.bucket_exists(STUDENT_ID + '-1')
+        # AND the bucket associated with it exists afterwards
+        self.assertTrue(testutils.bucket_exists(STUDENT_ID))
+        self.assertTrue(testutils.bucket_exists(STUDENT_ID + '-1'))

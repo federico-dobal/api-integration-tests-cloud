@@ -1,6 +1,7 @@
 from api.get_item_db import lambda_handler
 import unittest
 import testutils
+import json
 
 STREET_NAME = "address-A"
 STREET_NUMBER = "1234"
@@ -30,11 +31,26 @@ class TestLambdaGetAddress(unittest.TestCase):
 
 
     def test_get_address_exists(self):
+        # GIVEN an street name that is already in the DB
         event = {'id': STREET_NAME}
+
+        # WHEN the Lambda function is executed
         address = lambda_handler(event=event, context=None)
 
-        self.assertEqual(address.get('street_name'), STREET_NAME)
-        self.assertEqual(address.get('number'), STREET_NUMBER)
-        self.assertEqual(address.get('postal_code'), STREET_POSTAL_CODE)
+        # THEN it returns the right record
+        response_body = json.loads(address.get('body'))
+        self.assertEqual(response_body.get('street_name'), STREET_NAME)
+        self.assertEqual(response_body.get('number'), STREET_NUMBER)
+        self.assertEqual(response_body.get('postal_code'), STREET_POSTAL_CODE)
 
+    def test_get_address_not_exists(self):
+        # GIVEN an street name that is NOT in the DB
+        event = {'id': 'name'}
+
+        # WHEN the Lambda function is executed
+        address = lambda_handler(event=event, context=None)
+
+        # THEN it does not retrieve any record
+        self.assertIsNone(address.get('street_name'))
+        
         

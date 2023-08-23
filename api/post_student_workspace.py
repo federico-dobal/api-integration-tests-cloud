@@ -18,4 +18,4 @@ def lambda_handler(event, context):
         return format_return(status_code=200, body={'message': 'Workspace created successfully'})
     except ApiException as e:
         logger.error(f"API Exception: {e.body}")
-        return format_return(status_code=e.status_code, body=e.body)
+        return format_return(status_code=e.status_code, body={'message': 'Workspace creation failed'})
