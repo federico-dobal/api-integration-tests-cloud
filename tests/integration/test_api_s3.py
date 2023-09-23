@@ -1,7 +1,9 @@
-from api.post_student_workspace import lambda_handler
+from api.main import create_api
 import unittest
 import testutils
+from fastapi.testclient import TestClient
 import json
+
 
 STUDENT_ID = "lopez-antonio-23456"
 
@@ -15,6 +17,10 @@ class TestLambdaWorkspace(unittest.TestCase):
         testutils.create_bucket(
             STUDENT_ID
         )
+
+        app = create_api()
+        self.client = TestClient(app)
+        
         
     
     def tearDown(self):
@@ -31,11 +37,12 @@ class TestLambdaWorkspace(unittest.TestCase):
         self.assertTrue(testutils.bucket_exists(STUDENT_ID))
 
         # WHEN the Lambda function is executed
-        address = lambda_handler(event=event, context=None)
+        #address = lambda_handler(event=event, context=None)
+        address = self.client.post('workspace', json=event)
 
         # THEN it is successfully retrieved
-        self.assertEqual(address.get('statusCode'), 200)
-        self.assertEqual(json.loads(address.get('body')).get('message'), 'Workspace created successfully')
+        self.assertEqual(address.status_code, 400)
+        self.assertEqual(json.loads(address.content).get('message'), 'Workspace already exists')
         
         # AND the bucket associated with it still exists
         self.assertTrue(testutils.bucket_exists(STUDENT_ID))
@@ -46,11 +53,12 @@ class TestLambdaWorkspace(unittest.TestCase):
         event = {'id': STUDENT_ID + '-1'}
 
         # WHEN the Lambda function is executed
-        address = lambda_handler(event=event, context=None)
+        #address = lambda_handler(event=event, context=None)
+        address = self.client.post('workspace/', json=event)
 
         # THEN it is successfully created and retrieved
-        self.assertEqual(address.get('statusCode'), 200)
-        self.assertEqual(json.loads(address.get('body')).get('message'), 'Workspace created successfully')        
+        self.assertEqual(address.status_code, 200)
+        self.assertEqual(json.loads(address.content), 'Workspace created successfully')
         
         # AND the bucket associated with it exists afterwards
         self.assertTrue(testutils.bucket_exists(STUDENT_ID))

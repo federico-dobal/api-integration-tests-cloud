@@ -1,7 +1,9 @@
-from api.get_item_db import lambda_handler
+from api.main import create_api
 import unittest
 import testutils
+from fastapi.testclient import TestClient
 import json
+
 
 STREET_NAME = "address-A"
 STREET_NUMBER = "1234"
@@ -21,6 +23,9 @@ class TestLambdaGetAddress(unittest.TestCase):
                 "postal_code": {"S": STREET_POSTAL_CODE}
             }
         )
+
+        app = create_api()
+        self.client = TestClient(app)
         
     
     def tearDown(self):
@@ -29,28 +34,31 @@ class TestLambdaGetAddress(unittest.TestCase):
         """
         testutils.delete_address({"street_name": {"S": STREET_NAME}})
 
+    def test_get_address_successful(self):
+        # GIVEN the API is configured(in the setUp method)
+        
+        # WHEN the GET endpoint is executed
+        response = self.client.get("/address/address-A")
+        
+        # THEN the response is successfull
+        self.assertEqual(response.status_code, 200)
+        
+        # AND the data details is the right one
+        response = json.loads(response.content)
+        self.assertEqual(response.get('number'), '1234')
+        self.assertEqual(response.get('postal_code'), '9876')
+        self.assertEqual(response.get('street_name'), 'address-A')
 
-    def test_get_address_exists(self):
-        # GIVEN an street name that is already in the DB
-        event = {'id': STREET_NAME}
-
-        # WHEN the Lambda function is executed
-        address = lambda_handler(event=event, context=None)
-
-        # THEN it returns the right record
-        response_body = json.loads(address.get('body'))
-        self.assertEqual(response_body.get('street_name'), STREET_NAME)
-        self.assertEqual(response_body.get('number'), STREET_NUMBER)
-        self.assertEqual(response_body.get('postal_code'), STREET_POSTAL_CODE)
-
+    
     def test_get_address_not_exists(self):
-        # GIVEN an street name that is NOT in the DB
-        event = {'id': 'name'}
+        # GIVEN the API is configured(in the setUp method)
+        
+        # WHEN the GET endpoint is executed with invalid address id
+        response = self.client.get("/address/address-Z")
+        
+        # THEN the response is not found
+        self.assertEqual(response.status_code, 404)
+    
 
-        # WHEN the Lambda function is executed
-        address = lambda_handler(event=event, context=None)
-
-        # THEN it does not retrieve any record
-        self.assertIsNone(address.get('street_name'))
         
         

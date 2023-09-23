@@ -6,7 +6,7 @@ ADDRESS_TABLE = os.environ.get("ADDRESS_TABLE", "eu-central-1")
 REGION = os.environ.get("REGION", "")
 
 
-def get_dynamo_client():
+def _get_dynamo_client():
     return boto3.client(
         "dynamodb",
         region_name=REGION,
@@ -14,7 +14,7 @@ def get_dynamo_client():
     )
 
 
-def get_s3_client():
+def _get_s3_client():
     return boto3.client(
         "s3",
         region_name=REGION,
@@ -23,19 +23,19 @@ def get_s3_client():
 
 
 def add_address(address):
-    dynamo_client = get_dynamo_client()
+    dynamo_client = _get_dynamo_client()
     result = dynamo_client.put_item(TableName=ADDRESS_TABLE, Item=address)
     return result
 
 
 def delete_address(address):
-    dynamo_client = get_dynamo_client()
+    dynamo_client = _get_dynamo_client()
     result = dynamo_client.delete_item(TableName=ADDRESS_TABLE, Key=address)
     return result
 
 
 def create_bucket(bucket_name):
-    s3_client = get_s3_client()
+    s3_client = _get_s3_client()
 
     try:
         s3_client.head_bucket(
@@ -52,7 +52,7 @@ def create_bucket(bucket_name):
             return result
         
 def delete_bucket(bucket_name):
-    s3_client = get_s3_client()
+    s3_client = _get_s3_client()
 
     if bucket_exists(bucket=bucket_name):
         s3_client.delete_bucket(
@@ -62,7 +62,7 @@ def delete_bucket(bucket_name):
 def bucket_exists(bucket: str):
     """ Check whether bucket exists """
     try:
-        get_s3_client().head_bucket(
+        _get_s3_client().head_bucket(
             Bucket=bucket
         )
         return True

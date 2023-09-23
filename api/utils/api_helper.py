@@ -1,5 +1,6 @@
 from cloud_adapters.aws_adapter import AWS_Dynamodb_Adapter, AWS_S3_Adapter
 from utils.config import ADDRESS_TABLE_NAME
+from utils.utils import ApiException
 
 class API_helper():
 
@@ -12,7 +13,10 @@ class API_helper():
     
 
     def create_student_workspace(self, bucket_name: str):
+        
         if not self.aws_s3_Adapter.bucket_exists(self, bucket=bucket_name):
             self.aws_s3_Adapter.create_bucket(self,bucket=bucket_name)
+        else:
+            raise ApiException(status_code=400, message='Workspace already exists')
 
 

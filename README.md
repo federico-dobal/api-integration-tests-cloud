@@ -12,9 +12,9 @@ In order to execute the integration tests locally the following commands have to
 
 * Configure environment variables
 
-      $ source tests/integration/scripts/build_test_env.sh
+      $ source tests/integration/scripts/build_env.sh
       
-      $ sh tests/integration/scripts/build_test_env.sh
+      $ sh tests/integration/scripts/build_env.sh
 
 * Deploy infrastructure
 
@@ -35,3 +35,19 @@ In order to execute the integration tests locally the following commands have to
 
        $ localstack stop
       
+
+## API description
+
+### How to start the API locally?
+
+The following command has to be executed:
+
+        $ cd api
+        $ uvicorn main:app --reload
+
+The API documentation can be accessed [here](http://127.0.0.1:8000/docs)
+
+The API is composed of 2 endpoints:
+
+- address: integrates with AWS DynamoDB to store addresses information such as street name, postal code, number, etc.
+- workspace: integrates with AWS S3 in order to create buckets to store files associated with a given _id_.   
